@@ -1,19 +1,25 @@
 rm(list=ls())
-## Load Rstan library 
+## Load libraries
+library(ggplot2)
 library(rstan)
 ## Simulated values for a linear regression with two predictors
+## Number of observations
 n <- 1000
+## Draw values from normal distribution
 x1 <- rnorm(n,0,1)
 x2 <- rnorm(n,5,10)
+## Set parameter values
 alpha <- 1.5
 beta1 <- 2.500000
 beta2 <- 3.000000
+## Generate y
 y <- alpha + (beta1 * x1)  + (beta2*x2) + rnorm(n)
-X <- as.matrix(cbind(1,x1,x2))
+
 
 ## Set up data for Stan
 N <- length(y) ## Number of rows
 K <- ncol(X) ## Number of predictors
+X <- as.matrix(cbind(1,x1,x2)) ## X matrix
 stan_data <- list(N = N, K = K, y = y, x = X) ## Data as a list
 
 ## Stan model
@@ -33,10 +39,11 @@ model {
 }
 "
 
+## Estimate model
 stan_mod <- stan(model_code = rs_code, data = stan_data, chains = 4)
-print(stan_mod)
+## Extract model output
 output <- extract(stan_mod, permuted = TRUE)
-names(output)
+## Get beta means and credible intervals
 betas <- (output$beta)
 means <- apply(betas, 2, mean)
 ci <- apply(betas, 2, quantile, c(.025,.975))
