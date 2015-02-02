@@ -40,4 +40,16 @@ names(output)
 betas <- (output$beta)
 means <- apply(betas, 2, mean)
 ci <- apply(betas, 2, quantile, c(.025,.975))
-colnames(t(rbind(means, ci)))
+
+## Plot the output
+plot.df <- as.data.frame(t(rbind(means, ci)))
+colnames(plot.df) <- c('mean','lb','ub')
+plot.df$var <- c('Intercept', 'beta 1', 'beta 2')
+
+p <- ggplot(plot.df, aes(x = var, y = mean))
+p <- p + geom_point()
+p <- p + geom_errorbar(aes(y = mean, ymax = ub, ymin = lb,width =.1))
+p <- p + labs(y="Coefficients with 95% credible intervals",x="Variable")
+p <- p + theme_bw()
+p <- p + coord_flip()
+p
